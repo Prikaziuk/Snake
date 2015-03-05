@@ -1,6 +1,9 @@
 __author__ = 'Admin'
 #!/usr/bin/env python3
 
+import random
+
+
 class Canvas:
     def __init__(self, width, height, fill='.'):
         self._width = width
@@ -28,8 +31,12 @@ class Canvas:
             self._x +=1
 
 
-    def put_apple(self, number):
-        pass
+    def put_apple(self, number, fill):
+        while number:
+            self._x = random.randint(0, self._width)
+            self._y = random.randint(0, self._height)
+            self._screen[self._x][self._y] = fill
+            number -=1
 
     def paint(self):
         for figure in self._figures:
@@ -44,8 +51,8 @@ class Canvas:
 def main():
     canvas = Canvas(10, 10)
     canvas.paint()
-    #canvas.put_apple(x, y, 'o')
-    #canvas.paint()
+    canvas.put_apple(3, 'o')
+    canvas.paint()
     canvas.put_snake(0, 0, 'x')
     canvas.paint()
     canvas.move_snake('s')
