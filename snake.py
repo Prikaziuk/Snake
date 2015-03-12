@@ -7,6 +7,9 @@ DOWN = 's'
 UP = 'w'
 RIGHT = 'd'
 LEFT = 'a'
+SNAKE = []
+APPLE = 'o'
+snake_length = 1
 
 class Field:
     def __init__(self, width, height):
@@ -24,6 +27,7 @@ class Field:
 
     def move_snake(self, direction):
         self._screen[self._y][self._x] = '_'
+        SNAKE.append([self._x, self._y])
         if direction == UP:
             self._y -=1
         elif direction == DOWN:
@@ -32,11 +36,15 @@ class Field:
             self._x -=1
         elif direction == RIGHT:
             self._x +=1
-        self._screen[self._y][self._x] = 'x'
+        SNAKE.append([self._x, self._y])
+        if self._screen[self._y][self._x] == APPLE:
+            snake_length +=1
+        for coord in range(snake_length):
+            self._screen[SNAKE[-coord][1]][SNAKE[-coord][0]] = 'x'
 
     def put_apple(self, number):
         for _ in range(number):
-            self._screen[random.randint(0, self._width-1)][random.randint(0, self._height-1)] = 'o'
+            self._screen[random.randint(0, self._width-1)][random.randint(0, self._height-1)] = APPLE
 
     def paint(self):
         for line in self._screen:
@@ -52,6 +60,7 @@ def main():
     field.paint()
     field.move_snake('s')
     field.paint()
+    print(SNAKE)
 
 if __name__ == '__main__':
     main()
