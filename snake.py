@@ -39,8 +39,9 @@ class Field:
         snake_trace.append([self._x, self._y])
 
 # moves snake in the given direction
-    def move_snake(self, direction, snake_length = snake_length):
+    def move_snake(self, direction):
         # remove snake from the screen
+        global snake_length
         for coord in snake_trace[-snake_length:]:
             self._screen[coord[1]][coord[0]] = '_'
         if direction == UP:
@@ -54,7 +55,7 @@ class Field:
         # append new coordinates of snake
         snake_trace.append([self._x, self._y])
         if self._screen[self._y][self._x] == APPLE:
-            snake_length +=1
+            snake_length += 1
         # add whole snake to the screen again
         for coord in snake_trace[-snake_length:]:
             self._screen[coord[1]][coord[0]] = SNAKE
