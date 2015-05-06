@@ -20,7 +20,7 @@ SNAKE = 'z'
 snake_length = 1
 snake_trace = []
 
-# apple parmeters
+# apple parameters
 APPLE = 'o'
 NUMBER_OF_APPLES = 5
 
@@ -31,36 +31,7 @@ class Field:
         self._height = height
         self._screen = [['_'] * width for _ in range(height)]
 
-# put snake in the beginning of the field (beginning coordinates are x = 0, y = 0)
-    def put_snake(self, x = 0, y = 0):
-        self._x = x
-        self._y = y
-        self._screen[x][y] = SNAKE
-        snake_trace.append([self._x, self._y])
-
-# moves snake in the given direction
-    def move_snake(self, direction):
-        # remove snake from the screen
-        global snake_length
-        for coord in snake_trace[-snake_length:]:
-            self._screen[coord[1]][coord[0]] = '_'
-        if direction == UP:
-            self._y = (self._y - 1) % self._height
-        elif direction == DOWN:
-            self._y = (self._y + 1) % self._height
-        elif direction == LEFT:
-            self._x = (self._x - 1) % self._width
-        elif direction == RIGHT:
-            self._x = (self._x + 1) % self._width
-        # append new coordinates of snake
-        snake_trace.append([self._x, self._y])
-        if self._screen[self._y][self._x] == APPLE:
-            snake_length += 1
-        # add whole snake to the screen again
-        for coord in snake_trace[-snake_length:]:
-            self._screen[coord[1]][coord[0]] = SNAKE
-
-# randomly put "number" quantity of apples on the screen
+    # randomly put "number" quantity of apples on the screen
     def put_apples(self, number = NUMBER_OF_APPLES):
         for _ in range(number):
             self._screen[random.randint(0, self._width-1)][random.randint(0, self._height-1)] = APPLE
@@ -71,13 +42,46 @@ class Field:
             print(''.join(line))
         print()
 
+
+class Snake:
+# put snake in the beginning of the field (beginning coordinates are x = 0, y = 0)
+    def __init__(self, field, x = 0, y = 0):
+        self._field = field
+        self._x = x
+        self._y = y
+        self._field._screen[x][y] = SNAKE
+        snake_trace.append([x, y])
+
+# moves snake in the given direction
+    def move(self, direction):
+        # remove snake from the screen
+        global snake_length
+        for coord in snake_trace[-snake_length:]:
+            self._field._screen[coord[1]][coord[0]] = '_'
+        if direction == UP:
+            self._y = (self._y - 1) % self._field._height
+        elif direction == DOWN:
+            self._y = (self._y + 1) % self._field._height
+        elif direction == LEFT:
+            self._x = (self._x - 1) % self._field._width
+        elif direction == RIGHT:
+            self._x = (self._x + 1) % self._field._width
+        # append new coordinates of snake
+        snake_trace.append([self._x, self._y])
+        if self._field._screen[self._y][self._x] == APPLE:
+            snake_length += 1
+        # add whole snake to the screen again
+        for coord in snake_trace[-snake_length:]:
+            self._field._screen[coord[1]][coord[0]] = SNAKE
+
+
 def main():
     field = Field(10, 10)
     field.put_apples()
-    field.put_snake()
+    snake = Snake(field)
     field.paint()
     while True:
-        field.move_snake(input())
+        snake.move(input())
         field.paint()
         if snake_length == NUMBER_OF_APPLES + 1:
             print("Finish")
