@@ -44,21 +44,17 @@ class Field:
         for coord in snake_trace[-snake_length:]:
             self._screen[coord[1]][coord[0]] = '_'
         if direction == UP:
-            self._y -=1
+            self._y = (self._y - 1) % self._height
         elif direction == DOWN:
-            self._y +=1
+            self._y = (self._y + 1) % self._height
         elif direction == LEFT:
-            self._x -=1
+            self._x = (self._x - 1) % self._width
         elif direction == RIGHT:
-            self._x +=1
+            self._x = (self._x + 1) % self._width
         # append new coordinates of snake
         snake_trace.append([self._x, self._y])
-        try:
-            if self._screen[self._y][self._x] == APPLE:
-                snake_length +=1
-        except IndexError:
-            print("Game over")
-            quit()
+        if self._screen[self._y][self._x] == APPLE:
+            snake_length +=1
         # add whole snake to the screen again
         for coord in snake_trace[-snake_length:]:
             self._screen[coord[1]][coord[0]] = SNAKE
