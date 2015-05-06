@@ -15,10 +15,6 @@ UP = 'w'
 RIGHT = 'd'
 LEFT = 'a'
 
-# snake parameters
-SNAKE = 'z'
-snake_length = 1
-snake_trace = []
 
 # apple parameters
 APPLE = 'o'
@@ -44,6 +40,11 @@ class Field:
 
 
 class Snake:
+    # snake parameters
+    SNAKE = 'z'
+    snake_length = 1
+    snake_trace = []
+
 # put snake in the beginning of the field (beginning coordinates are x = 0, y = 0)
     def __init__(self, field, x = 0, y = 0):
         self._field = field
@@ -55,7 +56,7 @@ class Snake:
 # moves snake in the given direction
     def move(self, direction):
         # remove snake from the screen
-        global snake_length
+       #global snake_length
         for coord in snake_trace[-snake_length:]:
             self._field._screen[coord[1]][coord[0]] = '_'
         if direction == UP:
