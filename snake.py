@@ -29,36 +29,13 @@ class Field:
     def __init__(self, width, height):
         self._width = width
         self._height = height
-        self._screen = [['_'] * width for _ in range(height)]
-
-    # randomly put "number" quantity of apples on the screen
-    def put_apples(self, number = NUMBER_OF_APPLES):
-        for _ in range(number):
-            self._screen[random.randint(0, self._width-1)][random.randint(0, self._height-1)] = APPLE
-        # test that all apples are at unique positions
-        actual_number_of_apples = 0
-        for line in self._screen:
-            actual_number_of_apples += line.count(APPLE)
-        # if more then one apple is at the same position put_apple again
-        if actual_number_of_apples != number:
-            self.put_apples()
-
-
-# paint all what is on the field
-    def paint(self):
-        for line in self._screen:
-            print(''.join(line))
-        print()
+        #self._screen = [['_'] * width for _ in range(height)]
 
 
 class Snake:
-# put snake in the beginning of the field (beginning coordinates are x = 0, y = 0)
-    def __init__(self, field, x = 0, y = 0):
-        self._field = field
-        self._x = x
-        self._y = y
-        self._field._screen[x][y] = SNAKE
-        snake_trace.append([x, y])
+    snake_coord = []
+    def __init__(self, head_coord):
+        self._head_coord = []
 
 # moves snake in the given direction
     def move(self, direction):
@@ -94,23 +71,60 @@ class Snake:
             print("GAME OVER! Your snake crashed")
             quit()
 
+class User:
+    def __init__(self):
+        pass
+
+    def get_direction(self):
+        direction = input()
+        if direction in [DOWN, UP, RIGHT, LEFT]:
+            return direction
+
+class Game:
+    def __init__(self, field, snake, user):
+        self._field = field
+        self._snake = snake
+        self._user = user
+
+    # randomly put "number" quantity of apples on the screen
+    def put_apples(self, number = NUMBER_OF_APPLES):
+        apples_positions = []
+        for _ in range(number):
+            apples_positions.append([random.randint(0, self._field._width-1), random.randint(0, self._field._height-1)])
+        # test that all apples are at unique positions. If more then one apple is at the same position put_apple again
+        if len(apples_positions) != number:
+            self.put_apples()
+        else:
+            return apples_positions
+
+
+    def start(self):
+        pass
+
+    def paint(self):
+        for line in self._screen:
+            print(''.join(line))
+        print()
+
+
+
+```
+        else:
+            snake.move(direction)
+            field.paint()
+        if snake_length == NUMBER_OF_APPLES + 1:
+            print("Finish")
+```
+
+
+
 
 def main():
     field = Field(10, 10)
     field.put_apples()
     snake = Snake(field)
     field.paint()
-    while True:
-        direction = input()
-        if direction not in [DOWN, UP, RIGHT, LEFT]:
-            print("This is not direction, please, try again")
-            continue
-        else:
-            snake.move(direction)
-            field.paint()
-        if snake_length == NUMBER_OF_APPLES + 1:
-            print("Finish")
-            break
+
 
 
 if __name__ == '__main__':
