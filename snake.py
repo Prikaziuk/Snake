@@ -5,29 +5,23 @@ Python version of the common game "Snake and apples".
 
 Usage: snake.py [number_of_apples]
 """
-import random
+from random import randrange
 
 # import sys sys.argv[1] = number_of_apples
 
+"""
+Some constants that will be used: snake direction (str), symbols of snake (str) and apple (str)
+ and number of apples to appear on the field (int)
+"""
 DOWN = 's'
 UP = 'w'
 RIGHT = 'd'
 LEFT = 'a'
-"""
-direction of snake movements, types of all (str)
-"""
+
 SNAKE = 'z'
-"""
-SNAKE (str) : symbol of snake
-"""
 APPLE = 'o'
-"""
-APPLE (str) : symbol of apple
-"""
+
 NUMBER_OF_APPLES = 5
-"""
-NUMBER_OF_APPLES (int) : number of apples to appear on the field
-"""
 
 
 class Field:
@@ -66,7 +60,6 @@ class Snake:
         _snake_coord (list of tuples) : coordinates of the whole snake
     """
     def __init__(self, head_coord):
-        self._head_coord = head_coord
         self._snake_coord = [head_coord]
 
     def __len__(self):
@@ -75,6 +68,15 @@ class Snake:
             int : length of the snake
         """
         return len(self._snake_coord)
+
+    def __iter__(self):
+        """
+        Generator
+
+        :yields: tuple from the list of tuples
+        """
+        for i in range(len(self)):
+            yield self._snake_coord[i]
 
     def head(self):
         """
@@ -86,7 +88,7 @@ class Snake:
     def snake_coordinates(self):
         """
         :return:
-            (list of tuples) : coordinates of the snake head (y, x)
+            (list of tuples) : list of coordinates of the snake (y, x)
         """
         return self._snake_coord
 
@@ -101,9 +103,6 @@ class Snake:
         self._snake_coord.append(position)
         if not is_apple:
             self._snake_coord.pop(0)
-        if len(self) != len(set(self._snake_coord)):
-            print("\n GAME OVER! Your snake crashed")
-            quit()
 
 
 class User:
@@ -120,16 +119,15 @@ class User:
         :print:
             (str) : "input() does not give any direction. Available directions are: DOWN, UP, RIGHT,LEFT"
                   "Please, type valid command to set snake direction:"
-        and initiates itself again until everything will be well
+        and asks user for new input of direction
         """
         direction = input()
-        if direction in [DOWN, UP, RIGHT, LEFT]:
-            return direction
-        else:
+        while direction not in [DOWN, UP, RIGHT, LEFT]:
             print("'{}' does not set any direction. \n Available directions are:"
                   " \n \tDOWN : '{}' \n \tUP : '{}' \n \tRIGHT : '{}' \n \tLEFT : '{}' \n "
                   "Please, type valid command to set snake direction:".format(direction, DOWN, UP, RIGHT, LEFT))
-            return self.get_direction()
+            direction = input()
+        return direction
 
 
 class Game:
@@ -158,17 +156,15 @@ class Game:
         :return: None
         """
         while len(self._apples_positions) < number:
-            self._apples_positions.add((random.randint(0, self._field.height() - 1),
-                                       random.randint(0, self._field.width() - 1)))
+            self._apples_positions.add((randrange(self._field.height()), randrange(self._field.width())))
 
-    def move_snake(self):
+    def _move_snake(self):
         """
         Works with user input: transforms direction into snake_head coordinates (position)
         :return: None
         """
         direction = self._user.get_direction()
         y, x = self._snake.head()
-        # print(self._snake.head())
         if direction == LEFT:
             x = (x - 1) % self._field.width()
         elif direction == RIGHT:
@@ -178,7 +174,6 @@ class Game:
         elif direction == DOWN:
             y = (y + 1) % self._field.height()
         position = (y, x)
-        # print(position)
         is_apple = position in self._apples_positions
         if is_apple:
             self._apples_positions.remove(position)
@@ -192,7 +187,7 @@ class Game:
         screen = [['_'] * self._field.width() for _ in range(self._field.height())]
         for coord in self._apples_positions:
             screen[coord[0]][coord[1]] = APPLE
-        for coord in self._snake.snake_coordinates():
+        for coord in self._snake:
             screen[coord[0]][coord[1]] = SNAKE
         for line in screen:
             print(''.join(line))
@@ -208,7 +203,10 @@ class Game:
         self.put_apples()
         self.paint()
         while len(self._snake) < NUMBER_OF_APPLES + 1:
-            self.move_snake()
+            self._move_snake()
+            if len(self._snake) != len(set(self._snake.snake_coordinates())):
+                print("\n GAME OVER! Your snake crashed")
+                quit()
             self.paint()
         print("\n YOU WIN! All apples are safely collected")
 
