@@ -71,12 +71,9 @@ class Snake:
 
     def __iter__(self):
         """
-        Generator
-
-        :yields: tuple from the list of tuples
+        :return: tuple from the list of tuples
         """
-        for i in range(len(self)):
-            yield self._snake_coord[i]
+        return iter(self._snake_coord)
 
     def head(self):
         """
@@ -104,30 +101,35 @@ class Snake:
         if not is_apple:
             self._snake_coord.pop(0)
 
-
-class User:
-    """
-    Works with user's commands.
-    """
-    def get_direction(self):
+    def revert(self):
         """
-        When everything is well
-        :return:
-            direction (str) : DOWN, UP, RIGHT, LEFT
+        Reverts the snake
 
-        When something goes wrong (typo in input)
-        :print:
-            (str) : "input() does not give any direction. Available directions are: DOWN, UP, RIGHT,LEFT"
-                  "Please, type valid command to set snake direction:"
+        :return: None
+        """
+        self._snake_coord = self._snake_coord[::-1]
+
+
+
+def get_direction():
+    """
+    When everything is well
+    :return:
+        direction (str) : DOWN, UP, RIGHT, LEFT
+
+    When something goes wrong (typo in input)
+    :print:
+        (str) : "input() does not give any direction. Available directions are: DOWN, UP, RIGHT,LEFT"
+                 "Please, type valid command to set snake direction:"
         and asks user for new input of direction
-        """
+    """
+    direction = input()
+    while direction not in [DOWN, UP, RIGHT, LEFT]:
+        print("'{}' does not set any direction. \n Available directions are:"
+              " \n \tDOWN : '{}' \n \tUP : '{}' \n \tRIGHT : '{}' \n \tLEFT : '{}' \n "
+              "Please, type valid command to set snake direction:".format(direction, DOWN, UP, RIGHT, LEFT))
         direction = input()
-        while direction not in [DOWN, UP, RIGHT, LEFT]:
-            print("'{}' does not set any direction. \n Available directions are:"
-                  " \n \tDOWN : '{}' \n \tUP : '{}' \n \tRIGHT : '{}' \n \tLEFT : '{}' \n "
-                  "Please, type valid command to set snake direction:".format(direction, DOWN, UP, RIGHT, LEFT))
-            direction = input()
-        return direction
+    return direction
 
 
 class Game:
@@ -141,10 +143,9 @@ class Game:
         _apples_positions (set of tuples) : set of given length (equal to NUMBER_OF_APPLES)
         with tuples of apples coordinates (y, x)
     """
-    def __init__(self, field, snake, user):
+    def __init__(self, field, snake):
         self._field = field
         self._snake = snake
-        self._user = user
         self._apples_positions = set()
 
 # randomly put "number" quantity of apples on the screen
@@ -163,7 +164,7 @@ class Game:
         Works with user input: transforms direction into snake_head coordinates (position)
         :return: None
         """
-        direction = self._user.get_direction()
+        direction = get_direction()
         y, x = self._snake.head()
         if direction == LEFT:
             x = (x - 1) % self._field.width()
@@ -177,7 +178,10 @@ class Game:
         is_apple = position in self._apples_positions
         if is_apple:
             self._apples_positions.remove(position)
-        self._snake.move(position, is_apple)
+        if len(self._snake) > 2 and position == self._snake.snake_coordinates()[-2]:
+            self._snake.revert()
+        else:
+            self._snake.move(position, is_apple)
 
     def paint(self):
         """
@@ -218,8 +222,7 @@ def main():
     """
     field = Field(10, 10)
     snake = Snake((0, 0))
-    user = User()
-    game = Game(field, snake, user)
+    game = Game(field, snake)
     game.start()
 
 
