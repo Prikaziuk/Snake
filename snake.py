@@ -110,7 +110,6 @@ class Snake:
         self._snake_coord = self._snake_coord[::-1]
 
 
-
 def user_input():
     """
     When everything is well
@@ -139,7 +138,7 @@ class Game:
     Attributes:
         field (class) : class with parameters of the field for a game
         snake (class) : class with parameters of snake
-        user (class) : class with parameter of user's input()
+        user (function) : user_input()
         _apples_positions (set of tuples) : set of given length (equal to NUMBER_OF_APPLES)
         with tuples of apples coordinates (y, x)
     """
@@ -149,7 +148,6 @@ class Game:
         self._user_function = user
         self._apples_positions = set()
 
-# randomly put "number" quantity of apples on the screen
     def put_apples(self, number=NUMBER_OF_APPLES):
         """
         Fills the set of _apples_positions
