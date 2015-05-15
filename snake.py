@@ -111,7 +111,7 @@ class Snake:
 
 
 
-def get_direction():
+def user_input():
     """
     When everything is well
     :return:
@@ -143,9 +143,10 @@ class Game:
         _apples_positions (set of tuples) : set of given length (equal to NUMBER_OF_APPLES)
         with tuples of apples coordinates (y, x)
     """
-    def __init__(self, field, snake):
+    def __init__(self, field, snake, user):
         self._field = field
         self._snake = snake
+        self._user_function = user
         self._apples_positions = set()
 
 # randomly put "number" quantity of apples on the screen
@@ -164,7 +165,7 @@ class Game:
         Works with user input: transforms direction into snake_head coordinates (position)
         :return: None
         """
-        direction = get_direction()
+        direction = self._user_function()
         y, x = self._snake.head()
         if direction == LEFT:
             x = (x - 1) % self._field.width()
@@ -222,7 +223,7 @@ def main():
     """
     field = Field(10, 10)
     snake = Snake((0, 0))
-    game = Game(field, snake)
+    game = Game(field, snake, user_input)
     game.start()
 
 
