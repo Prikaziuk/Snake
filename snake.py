@@ -39,14 +39,14 @@ class Field:
 
     def width(self):
         """
-        :return:
+        :return: (int)
             width
         """
         return self._width
 
     def height(self):
         """
-        :return:
+        :return: (int)
             height
         """
         return self._height
@@ -55,11 +55,12 @@ class Field:
 class Snake:
     """
     Information about the snake.
-
-    Attributes:
-        head_coord (tuple) : coordinates of the snake head (y, x)
     """
     def __init__(self, head_coord):
+        """
+        Arg:
+            head_coord (tuple) : coordinates of the snake head (y, x)
+        """
         self._snake_coord = deque([head_coord])
 
     def __len__(self):
@@ -139,10 +140,6 @@ class Game:
         field (class) : class with parameters of the field for a game
         snake (class) : class with parameters of snake
         user (function) : user_input()
-        _apples_positions (set of tuples) : set of given length (equal to NUMBER_OF_APPLES)
-        with tuples of apples coordinates (y, x)
-        _direction_action (dict) : key == direction (str),
-                                   value == function that returns tuple with new coordinates (y, x)
     """
     def __init__(self, field, snake, user):
         self._field = field
@@ -163,7 +160,7 @@ class Game:
         :param number (int) : number of apples to be put on the field, default NUMBER_OF_APPLES
         :return: None
         """
-        while len(self._apples_positions) < number:
+        while len(self._apples_positions) < number and self._snake.head() not in self._apples_positions:
             self._apples_positions.add((randrange(self._field.height()), randrange(self._field.width())))
 
     def _move_snake(self):
@@ -197,29 +194,29 @@ class Game:
 
     def check_snake(self):
         """
-        Checks snake accidents and moves it if all is well
+        Checks snake accidents
 
         :return: None if everything is well
-        :print: "GAME OVER! Your snake crashed" if snake moves into itself
+        :print: "GAME OVER! Your snake crashed" if snake moves into itself and interrupts programme
         """
-        while len(self._snake) < NUMBER_OF_APPLES + 1:
-            self._move_snake()
-            if len(self._snake) != len(set(self._snake.snake_coordinates())):
-                print("\n GAME OVER! Your snake crashed")
-                quit()
-            self.paint()
+        if len(self._snake) != len(set(self._snake.snake_coordinates())):
+            print("\n GAME OVER! Your snake crashed")
+            quit()
 
     def start(self):
         """
         Starts and controls the game.
 
-        Randomly puts apples on the field, asks user for snake movement direction.
+        Randomly puts apples on the field, asks user for snake movement direction, 
         :return: None
         :print: "YOU WIN! All apples are safely collected" when the game is finished
         """
         self.put_apples()
         self.paint()
-        self.check_snake()
+        while len(self._snake) < NUMBER_OF_APPLES + 1:
+            self._move_snake()
+            self.check_snake()
+            self.paint()
         print("\n YOU WIN! All apples are safely collected")
 
 
