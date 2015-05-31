@@ -6,6 +6,7 @@ Python version of the common game "Snake and apples".
 Usage: snake.py [number_of_apples]
 """
 from random import randrange
+from collections import deque
 
 # import sys sys.argv[1] = number_of_apples
 
@@ -56,11 +57,11 @@ class Snake:
     Information about the snake.
 
     Attributes:
-        _head_coord (tuple) : coordinates of the snake head (y, x)
-        _snake_coord (list of tuples) : coordinates of the whole snake
+        head_coord (tuple) : coordinates of the snake head (y, x)
     """
     def __init__(self, head_coord):
-        self._snake_coord = [head_coord]
+        self._snake_coord = deque()
+        self._snake_coord.append(head_coord)
 
     def __len__(self):
         """
@@ -99,7 +100,7 @@ class Snake:
         """
         self._snake_coord.append(position)
         if not is_apple:
-            self._snake_coord.pop(0)
+            self._snake_coord.popleft()
 
     def revert(self):
         """
@@ -107,7 +108,7 @@ class Snake:
 
         :return: None
         """
-        self._snake_coord = self._snake_coord[::-1]
+        self._snake_coord.reverse()
 
 
 def user_input():
@@ -141,12 +142,20 @@ class Game:
         user (function) : user_input()
         _apples_positions (set of tuples) : set of given length (equal to NUMBER_OF_APPLES)
         with tuples of apples coordinates (y, x)
+        _direction_action (dict) : key == direction (str),
+                                   value == function that returns tuple with new coordinates (y, x)
     """
     def __init__(self, field, snake, user):
         self._field = field
         self._snake = snake
         self._user_function = user
         self._apples_positions = set()
+        self._direction_action = {
+            LEFT: lambda x, y: (y, (x - 1) % self._field.width()),
+            RIGHT: lambda x, y: (y, (x + 1) % self._field.width()),
+            UP: lambda x, y: ((y - 1) % self._field.height(), x),
+            DOWN: lambda x, y: ((y + 1) % self._field.height(), x)
+        }
 
     def put_apples(self, number=NUMBER_OF_APPLES):
         """
@@ -165,15 +174,7 @@ class Game:
         """
         direction = self._user_function()
         y, x = self._snake.head()
-        if direction == LEFT:
-            x = (x - 1) % self._field.width()
-        elif direction == RIGHT:
-            x = (x + 1) % self._field.width()
-        elif direction == UP:
-            y = (y - 1) % self._field.height()
-        elif direction == DOWN:
-            y = (y + 1) % self._field.height()
-        position = (y, x)
+        position = self._direction_action[direction](x, y)
         is_apple = position in self._apples_positions
         if is_apple:
             self._apples_positions.remove(position)
@@ -195,6 +196,20 @@ class Game:
         for line in screen:
             print(''.join(line))
 
+    def check_snake(self):
+        """
+        Checks snake accidents and moves it if all is well
+
+        :return: None if everything is well
+        :print: "GAME OVER! Your snake crashed" if snake moves into itself
+        """
+        while len(self._snake) < NUMBER_OF_APPLES + 1:
+            self._move_snake()
+            if len(self._snake) != len(set(self._snake.snake_coordinates())):
+                print("\n GAME OVER! Your snake crashed")
+                quit()
+            self.paint()
+
     def start(self):
         """
         Starts and controls the game.
@@ -205,12 +220,7 @@ class Game:
         """
         self.put_apples()
         self.paint()
-        while len(self._snake) < NUMBER_OF_APPLES + 1:
-            self._move_snake()
-            if len(self._snake) != len(set(self._snake.snake_coordinates())):
-                print("\n GAME OVER! Your snake crashed")
-                quit()
-            self.paint()
+        self.check_snake()
         print("\n YOU WIN! All apples are safely collected")
 
 
