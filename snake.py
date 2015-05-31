@@ -60,8 +60,7 @@ class Snake:
         head_coord (tuple) : coordinates of the snake head (y, x)
     """
     def __init__(self, head_coord):
-        self._snake_coord = deque()
-        self._snake_coord.append(head_coord)
+        self._snake_coord = deque([head_coord])
 
     def __len__(self):
         """
