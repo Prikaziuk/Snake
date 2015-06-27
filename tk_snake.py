@@ -7,10 +7,10 @@ Usage: snake.py [number_of_apples]
 """
 from random import randrange
 from snake import Snake, Field
-from tkinter import *
+import tkinter as tk
 from tkinter import messagebox
 
-root = Tk()
+root = tk.Tk()
 # import sys sys.argv[1] = number_of_apples
 
 """
@@ -22,10 +22,7 @@ UP = 'UP'
 RIGHT = "RIGHT"
 LEFT = 'LEFT'
 
-SNAKE = 'z'
-APPLE = 'o'
-
-NUMBER_OF_APPLES = 5
+NUMBER_OF_APPLES = 2
 
 
 class Game:
@@ -39,25 +36,27 @@ class Game:
     def __init__(self, field, snake):
         self._field = field
         self._snake = snake
-        self._apples_positions = set()
+        self._apple_position = tuple()
+        self._painted_apples = 0
         self._direction_action = {
             LEFT: lambda x, y: (y, (x - 1) % self._field.width()),
             RIGHT: lambda x, y: (y, (x + 1) % self._field.width()),
             UP: lambda x, y: ((y - 1) % self._field.height(), x),
             DOWN: lambda x, y: ((y + 1) % self._field.height(), x)
         }
-        self._canvas = Canvas(root, width=self._field.width()*10, height=self._field.height()*10, bg='green')
+        self._canvas = tk.Canvas(root, width=self._field.width()*10, height=self._field.height()*10, bg='green')
         self._canvas.pack()
 
-    def put_apples(self, number=NUMBER_OF_APPLES):
+    def put_apple(self):
         """
-        Fills the set of _apples_positions
+        Randomly puts an apple on the field, never on the snake
 
-        :param number (int) : number of apples to be put on the field, default NUMBER_OF_APPLES
         :return: None
         """
-        while len(self._apples_positions) < number and self._snake.head() not in self._apples_positions:
-            self._apples_positions.add((randrange(self._field.height()), randrange(self._field.width())))
+        apple_coord = (randrange(self._field.height()), randrange(self._field.width()))
+        if apple_coord in self._snake:
+            self.put_apple()
+        self._apple_position = apple_coord
 
     def _move_snake(self, direction):
         """
@@ -66,17 +65,22 @@ class Game:
         """
         y, x = self._snake.head()
         position = self._direction_action[direction](x, y)
-        is_apple = position in self._apples_positions
+        is_apple = position == self._apple_position
         if is_apple:
-            self._apples_positions.remove(position)
+            self.put_apple()
+            self.paint_apple()
         if len(self._snake) > 2 and position == self._snake.snake_coordinates()[-2]:
             self._snake.revert()
         else:
             self._snake.move(position, is_apple)
         self.paint_snake()
-        self.paint_apples()
 
     def paint_snake(self):
+        """
+        Paints snake on the field
+
+        :return: None
+        """
         self.check_snake()
         self._canvas.delete('snake')
         for coord in self._snake:
@@ -84,59 +88,70 @@ class Game:
                                           outline='white', fill='blue', tag='snake')
         self.win_check()
 
-    def paint_apples(self):
+    def check_snake(self):
+        """
+        Checks snake accidents
+
+        :return: None if everything is well
+        :raise: message window "GAME OVER! Your snake crashed" if snake moves into itself and interrupts programme
+        """
+        if len(self._snake) != len(set(self._snake.snake_coordinates())):
+            messagebox.showinfo("GAME OVER!", "Your snake crashed")
+            quit()
+
+    def win_check(self):
+        """
+        Checks winning conditional
+
+        :return: None
+        :raise: message window "YOU WIN! All apples are safely collected" when the game is finished
+        """
+        if len(self._snake) == NUMBER_OF_APPLES + 1:
+            messagebox.showinfo("YOU WIN!", "All apples are safely collected")
+            quit()
+
+    def paint_apple(self):
+        """
+        Paints an apple on the field, no more than NUMBER_OF_APPLES times for the game
+
+        :return: None
+        """
         self._canvas.delete('apple')
-        for coord in self._apples_positions:
+        coord = self._apple_position
+        if self._painted_apples < NUMBER_OF_APPLES:
             self._canvas.create_oval(coord[1]*10, coord[0]*10, coord[1]*10+10, coord[0]*10+10,
                                      fill='red', tag='apple')
+            self._painted_apples += 1
 
     def paint(self):
         """
         Prints field with apples and snake and creates buttons
         :return: None
         """
-        but = Button(root, text='LEFT')
+        but = tk.Button(root, text='LEFT')
         but.pack(side="left")
         but.bind("<Button-1>", lambda event: self._move_snake('LEFT'))
-        but2 = Button(root, text='RIGHT')
+        but2 = tk.Button(root, text='RIGHT')
         but2.pack(side='right')
         but2.bind("<Button-1>", lambda event: self._move_snake('RIGHT'))
-        but3 = Button(root, text='UP')
+        but3 = tk.Button(root, text='UP')
         but3.pack(side='top')
         but3.bind("<Button-1>", lambda event: self._move_snake('UP'))
-        but4 = Button(root, text='DOWN')
+        but4 = tk.Button(root, text='DOWN')
         but4.pack(side='bottom')
         but4.bind("<Button-1>", lambda event: self._move_snake('DOWN'))
         self.paint_snake()
-        self.paint_apples()
+        self.paint_apple()
         root.mainloop()
-
-    def check_snake(self):
-        """
-        Checks snake accidents
-
-        :return: None if everything is well
-        :print: "GAME OVER! Your snake crashed" if snake moves into itself and interrupts programme
-        """
-        if len(self._snake) != len(set(self._snake.snake_coordinates())):
-            messagebox.showinfo("GAME OVER!", "Your snake crashed")
-            quit()
 
     def start(self):
         """
         Starts and controls the game.
 
-        Randomly puts apples on the field, asks user for snake movement direction,
-        :return: None
-        :print: "YOU WIN! All apples are safely collected" when the game is finished
+        Randomly puts apple on the field, paints all on the window asks user for snake movement direction
         """
-        self.put_apples()
+        self.put_apple()
         self.paint()
-
-    def win_check(self):
-        if len(self._apples_positions) == 0:
-            messagebox.showinfo("YOU WIN!", "All apples are safely collected")
-            quit()
 
 
 def main():
