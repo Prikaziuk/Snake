@@ -9,6 +9,7 @@ from random import randrange
 from snake import Snake, Field
 import tkinter as tk
 from tkinter import messagebox
+import time
 
 root = tk.Tk()
 # import sys sys.argv[1] = number_of_apples
@@ -46,6 +47,7 @@ class Game:
         }
         self._canvas = tk.Canvas(root, width=self._field.width()*10, height=self._field.height()*10, bg='green')
         self._canvas.pack()
+        self._id = list()
 
     def put_apple(self):
         """
@@ -74,6 +76,11 @@ class Game:
         else:
             self._snake.move(position, is_apple)
         self.paint_snake()
+        self._id.append(self._canvas.after(500, self._move_snake, direction))
+        self._canvas.after_cancel(self._id.pop(0))
+        #time.sleep(1)
+        #self._move_snake("RIGHT")
+
 
     def paint_snake(self):
         """
@@ -87,6 +94,7 @@ class Game:
             self._canvas.create_rectangle(coord[1]*10, coord[0]*10, coord[1]*10 + 10, coord[0]*10 + 10,
                                           outline='white', fill='blue', tag='snake')
         self.win_check()
+        #self.auto()
 
     def check_snake(self):
         """
@@ -123,6 +131,7 @@ class Game:
                                      fill='red', tag='apple')
             self._painted_apples += 1
 
+
     def paint(self):
         """
         Prints field with apples and snake and creates buttons
@@ -151,6 +160,7 @@ class Game:
         Randomly puts apple on the field, paints all on the window asks user for snake movement direction
         """
         self.put_apple()
+        self._id.append(self._canvas.after(500, self._move_snake, "RIGHT"))
         self.paint()
 
 
