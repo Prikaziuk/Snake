@@ -2,17 +2,14 @@
 
 """
 Python version of the common game "Snake and apples".
-
-Usage: snake.py [number_of_apples]
 """
+
 from random import randrange
 from snake import Snake, Field
 import tkinter as tk
 from tkinter import messagebox
-import time
 
 root = tk.Tk()
-# import sys sys.argv[1] = number_of_apples
 
 """
 Some constants that will be used: snake direction (str), symbols of snake (str) and apple (str)
@@ -23,7 +20,7 @@ UP = 'UP'
 RIGHT = "RIGHT"
 LEFT = 'LEFT'
 
-NUMBER_OF_APPLES = 2
+NUMBER_OF_APPLES = 5
 
 
 class Game:
@@ -47,7 +44,7 @@ class Game:
         }
         self._canvas = tk.Canvas(root, width=self._field.width()*10, height=self._field.height()*10, bg='green')
         self._canvas.pack()
-        self._id = list()
+        self._after_id = list()
 
     def put_apple(self):
         """
@@ -76,11 +73,8 @@ class Game:
         else:
             self._snake.move(position, is_apple)
         self.paint_snake()
-        self._id.append(self._canvas.after(500, self._move_snake, direction))
-        self._canvas.after_cancel(self._id.pop(0))
-        #time.sleep(1)
-        #self._move_snake("RIGHT")
-
+        self._after_id.append(self._canvas.after(500, self._move_snake, direction))
+        self._canvas.after_cancel(self._after_id.pop(0))
 
     def paint_snake(self):
         """
@@ -94,7 +88,6 @@ class Game:
             self._canvas.create_rectangle(coord[1]*10, coord[0]*10, coord[1]*10 + 10, coord[0]*10 + 10,
                                           outline='white', fill='blue', tag='snake')
         self.win_check()
-        #self.auto()
 
     def check_snake(self):
         """
@@ -131,7 +124,6 @@ class Game:
                                      fill='red', tag='apple')
             self._painted_apples += 1
 
-
     def paint(self):
         """
         Prints field with apples and snake and creates buttons
@@ -157,10 +149,11 @@ class Game:
         """
         Starts and controls the game.
 
-        Randomly puts apple on the field, paints all on the window asks user for snake movement direction
+        Randomly puts apple on the field, initiates snake movements, paints all on the window
+        asks user for snake movement direction
         """
         self.put_apple()
-        self._id.append(self._canvas.after(500, self._move_snake, "RIGHT"))
+        self._after_id.append(self._canvas.after(500, self._move_snake, "RIGHT"))
         self.paint()
 
 
