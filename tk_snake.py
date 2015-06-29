@@ -21,7 +21,7 @@ UP = "UP"
 RIGHT = "RIGHT"
 LEFT = "LEFT"
 
-NUMBER_OF_APPLES = 20
+NUMBER_OF_APPLES = 2
 SNAKE_SPEED = 250
 SCALE = SHIFT = 10
 
@@ -62,15 +62,7 @@ class Game:
         """
         self._apple_position = (randrange(self._field.width()), randrange(self._field.height()))
         while self._apple_position in self._snake:
-            self.put_apple()
-        return len(self._snake) < self._field.height() * self._field.width()
-
-    def check_apple(self):
-        """
-        :raise: message window "Too many apples, can't put them"
-        """
-        if not self.put_apple():
-            messagebox.showinfo("Too many apples, can't put them")
+            self._apple_position = (randrange(self._field.width()), randrange(self._field.height()))
 
     def _move_snake(self, direction):
         """
@@ -82,7 +74,7 @@ class Game:
         if is_apple:
             self.put_apple()
             self.paint_apple()
-        if len(self._snake) > 2 and position == self._snake.snake_coordinates()[0]:
+        if len(self._snake) > 2 and position == self._snake.snake_coordinates()[-2]:
             self._snake.revert()
         else:
             self._snake.move(position, is_apple)
@@ -107,34 +99,37 @@ class Game:
         Checks snake accidents
 
         :return: True when snake crashes
-        :raise: message window "GAME OVER! Your snake crashed" if snake moves into itself and interrupts programme
         """
-        if len(self._snake) != len(set(self._snake.snake_coordinates())):
-            messagebox.showinfo("GAME OVER!", "Your snake crashed")
-            return True
+        return len(self._snake) != len(set(self._snake.snake_coordinates()))
 
     def check_win(self):
         """
         Checks winning conditional
 
         :return: True when all apples are collected
-        :raise: message window "YOU WIN! All apples are safely collected" when the game is finished
         """
-        if len(self._snake) == NUMBER_OF_APPLES + 1:
-            messagebox.showinfo("YOU WIN!", "All apples are safely collected")
-            return True
+        return len(self._snake) == NUMBER_OF_APPLES + 1
 
     def check_progress(self):
         """
         Stops the game, when something happen
+
         :return: None
+        :raise: message window "YOU WIN! All apples are safely collected" when the game is finished
+        :raise: message window "GAME OVER! Your snake crashed" if snake moves into itself
         """
-        if self.check_win() or self.check_snake():
+        if self.check_snake():
             self._canvas.destroy()
             but = tk.Button(root, text="Again?")
             but.pack()
             but.bind("<Button-1>", lambda event: [but.destroy(), main()])
-
+            messagebox.showinfo("GAME OVER!", "Your snake crashed")
+        if self.check_win():
+            self._canvas.destroy()
+            but = tk.Button(root, text="New level")
+            but.pack()
+            but.bind("<Button-1>", lambda event: [but.destroy(), main()])
+            messagebox.showinfo("YOU WIN!", "All apples are safely collected")
 
     def paint_apple(self):
         """
