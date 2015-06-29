@@ -79,16 +79,14 @@ class Game:
             self._snake.revert()
         else:
             self._snake.move(position, is_apple)
-        if not self.check_snake():
-            self.paint_snake()
+        self.paint_snake()
         self._after_id.append(self._canvas.after(SNAKE_SPEED, self._move_snake, direction))
         self._canvas.after_cancel(self._after_id.pop(0))
         if self.check_win() or self.check_snake():
-            self.paint_snake(colour=DIED_SNAKE_COLOUR)
             self._canvas.after_cancel(self._after_id.pop(0))
             self.check_progress()
 
-    def paint_snake(self, colour=SNAKE_COLOUR):
+    def paint_snake(self):
         """
         Paints snake on the field
 
@@ -97,8 +95,10 @@ class Game:
         self._canvas.delete('snake')
         for x, y in self._snake:
             self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
-                                          outline='white', fill=colour, tag='snake')
-
+                                          outline='white', fill=SNAKE_COLOUR, tag='snake')
+            if self._snake.snake_coordinates().count((x, y)) > 1:
+                self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
+                                              outline='white', fill=DIED_SNAKE_COLOUR, tag='snake')
 
     def check_snake(self):
         """
@@ -127,12 +127,12 @@ class Game:
         if self.check_snake():
             but = tk.Button(root, text="Again?")
             but.pack()
-            but.bind("<Button-1>", lambda event: [but.destroy(), main()])
+            but.bind("<Button-1>", lambda event: [but.destroy(),self._canvas.destroy(), main()])
             messagebox.showinfo("GAME OVER!", "Your snake crashed")
         if self.check_win():
             but = tk.Button(root, text="New level")
             but.pack()
-            but.bind("<Button-1>", lambda event: [but.destroy(), main()])
+            but.bind("<Button-1>", lambda event: [but.destroy(), self._canvas.destroy(), main()])
             messagebox.showinfo("YOU WIN!", "All apples are safely collected")
 
     def paint_apple(self):
