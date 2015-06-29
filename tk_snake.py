@@ -17,14 +17,13 @@ speed of snake movements in ms (int), scale of the field (int), shift for one st
 colours of field (str), snake (str) and apple (str)
 """
 DOWN = "DOWN"
-UP = 'UP'
+UP = "UP"
 RIGHT = "RIGHT"
-LEFT = 'LEFT'
+LEFT = "LEFT"
 
-NUMBER_OF_APPLES = 5
+NUMBER_OF_APPLES = 20
 SNAKE_SPEED = 250
-SCALE = 10
-SHIFT = 10
+SCALE = SHIFT = 10
 
 FIELD_COLOUR = 'green'
 SNAKE_COLOUR = 'blue'
@@ -42,50 +41,48 @@ class Game:
     def __init__(self, field, snake):
         self._field = field
         self._snake = snake
-        self._apple_position = ()
+        self._apple_position = tuple()
         self._painted_apples = 0
         self._direction_action = {
-            LEFT: lambda x, y: (y, (x - 1) % self._field.width()),
-            RIGHT: lambda x, y: (y, (x + 1) % self._field.width()),
-            UP: lambda x, y: ((y - 1) % self._field.height(), x),
-            DOWN: lambda x, y: ((y + 1) % self._field.height(), x)
+            LEFT: lambda x, y: ((x - 1) % self._field.width(), y),
+            RIGHT: lambda x, y: ((x + 1) % self._field.width(), y),
+            UP: lambda x, y: (x, (y - 1) % self._field.height()),
+            DOWN: lambda x, y: (x, (y + 1) % self._field.height())
         }
         self._canvas = tk.Canvas(root, width=self._field.width()*SCALE, height=self._field.height()*SCALE,
                                  bg=FIELD_COLOUR)
         self._canvas.pack()
         self._after_id = []
 
-    def try_put_apple(self):
+    def put_apple(self):
         """
         Randomly generates coordinate for an apple on the field
 
-        :return: True if apple on the snake, False otherwise
+        :return: False if no place for an apple
         """
-        self._apple_position = (randrange(self._field.height()), randrange(self._field.width()))
-        return self._apple_position in self._snake
+        self._apple_position = (randrange(self._field.width()), randrange(self._field.height()))
+        while self._apple_position in self._snake:
+            self.put_apple()
+        return len(self._snake) < self._field.height() * self._field.width()
 
-    def put_apple(self):
+    def check_apple(self):
         """
-        Puts apple on the field
-
-        :return: None
+        :raise: message window "Too many apples, can't put them"
         """
-        apple_on = self.try_put_apple()
-        while apple_on:
-            apple_on = self.try_put_apple()
+        if not self.put_apple():
+            messagebox.showinfo("Too many apples, can't put them")
 
     def _move_snake(self, direction):
         """
         Works with user input: transforms direction into snake_head coordinates (position)
         :return: None
         """
-        y, x = self._snake.head()
-        position = self._direction_action[direction](x, y)
+        position = self._direction_action[direction](*self._snake.head())
         is_apple = position == self._apple_position
         if is_apple:
             self.put_apple()
             self.paint_apple()
-        if len(self._snake) > 2 and position == self._snake.snake_coordinates()[-2]:
+        if len(self._snake) > 2 and position == self._snake.snake_coordinates()[0]:
             self._snake.revert()
         else:
             self._snake.move(position, is_apple)
@@ -99,34 +96,45 @@ class Game:
 
         :return: None
         """
-        self.check_snake()
         self._canvas.delete('snake')
-        for y, x in self._snake:
+        for x, y in self._snake:
             self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
                                           outline='white', fill=SNAKE_COLOUR, tag='snake')
-        self.win_check()
+        self.check_progress()
 
     def check_snake(self):
         """
         Checks snake accidents
 
-        :return: None if everything is well
+        :return: True when snake crashes
         :raise: message window "GAME OVER! Your snake crashed" if snake moves into itself and interrupts programme
         """
         if len(self._snake) != len(set(self._snake.snake_coordinates())):
             messagebox.showinfo("GAME OVER!", "Your snake crashed")
-            quit()
+            return True
 
-    def win_check(self):
+    def check_win(self):
         """
         Checks winning conditional
 
-        :return: None
+        :return: True when all apples are collected
         :raise: message window "YOU WIN! All apples are safely collected" when the game is finished
         """
         if len(self._snake) == NUMBER_OF_APPLES + 1:
             messagebox.showinfo("YOU WIN!", "All apples are safely collected")
-            quit()
+            return True
+
+    def check_progress(self):
+        """
+        Stops the game, when something happen
+        :return: None
+        """
+        if self.check_win() or self.check_snake():
+            self._canvas.destroy()
+            but = tk.Button(root, text="Again?")
+            but.pack()
+            but.bind("<Button-1>", lambda event: [but.destroy(), main()])
+
 
     def paint_apple(self):
         """
@@ -135,10 +143,10 @@ class Game:
         :return: None
         """
         self._canvas.delete('apple')
-        for y, x in [self._apple_position]:
-            if self._painted_apples < NUMBER_OF_APPLES:
-                self._canvas.create_oval(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT, fill=APPLE_COLOUR, tag='apple')
-                self._painted_apples += 1
+        x, y = self._apple_position
+        if self._painted_apples < NUMBER_OF_APPLES:
+            self._canvas.create_oval(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT, fill=APPLE_COLOUR, tag='apple')
+            self._painted_apples += 1
 
     def paint(self):
         """
@@ -157,12 +165,12 @@ class Game:
         initiates snake movements, paints all on the window, asks user for snake movement direction
         """
         self._canvas.focus_set()
-        self._canvas.bind('<Left>', lambda event: self._move_snake('LEFT'))
-        self._canvas.bind('<Right>', lambda event: self._move_snake('RIGHT'))
-        self._canvas.bind('<Up>', lambda event: self._move_snake('UP'))
-        self._canvas.bind('<Down>', lambda event: self._move_snake('DOWN'))
+        self._canvas.bind('<Left>', lambda event: self._move_snake(LEFT))
+        self._canvas.bind('<Right>', lambda event: self._move_snake(RIGHT))
+        self._canvas.bind('<Up>', lambda event: self._move_snake(UP))
+        self._canvas.bind('<Down>', lambda event: self._move_snake(DOWN))
         self.put_apple()
-        self._after_id.append(self._canvas.after(SNAKE_SPEED, self._move_snake, "RIGHT"))
+        self._after_id.append(self._canvas.after(SNAKE_SPEED, self._move_snake, RIGHT))
         self.paint()
 
 
