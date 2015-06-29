@@ -62,9 +62,7 @@ class Game:
         :return: False if apple on the snake, True otherwise
         """
         self._apple_position = (randrange(self._field.height()), randrange(self._field.width()))
-        if self._apple_position in self._snake:
-            return False
-        return True
+        return self._apple_position not in self._snake
 
     def put_apple(self):
         """
