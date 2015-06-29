@@ -21,7 +21,7 @@ UP = "UP"
 RIGHT = "RIGHT"
 LEFT = "LEFT"
 
-NUMBER_OF_APPLES = 2
+NUMBER_OF_APPLES = 20
 SNAKE_SPEED = 250
 SCALE = SHIFT = 10
 
@@ -81,6 +81,9 @@ class Game:
         self.paint_snake()
         self._after_id.append(self._canvas.after(SNAKE_SPEED, self._move_snake, direction))
         self._canvas.after_cancel(self._after_id.pop(0))
+        if self.check_win() or self.check_snake():
+            self._canvas.after_cancel(self._after_id.pop(0))
+            self.check_progress()
 
     def paint_snake(self):
         """
@@ -88,11 +91,11 @@ class Game:
 
         :return: None
         """
-        self._canvas.delete('snake')
-        for x, y in self._snake:
-            self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
-                                          outline='white', fill=SNAKE_COLOUR, tag='snake')
-        self.check_progress()
+        if not self.check_snake():
+            self._canvas.delete('snake')
+            for x, y in self._snake:
+                self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
+                                              outline='white', fill=SNAKE_COLOUR, tag='snake')
 
     def check_snake(self):
         """
@@ -119,13 +122,11 @@ class Game:
         :raise: message window "GAME OVER! Your snake crashed" if snake moves into itself
         """
         if self.check_snake():
-            self._canvas.destroy()
             but = tk.Button(root, text="Again?")
             but.pack()
             but.bind("<Button-1>", lambda event: [but.destroy(), main()])
             messagebox.showinfo("GAME OVER!", "Your snake crashed")
         if self.check_win():
-            self._canvas.destroy()
             but = tk.Button(root, text="New level")
             but.pack()
             but.bind("<Button-1>", lambda event: [but.destroy(), main()])
