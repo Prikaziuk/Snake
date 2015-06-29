@@ -12,9 +12,9 @@ from tkinter import messagebox
 root = tk.Tk()
 
 """
-Some constants that will be used: snake direction (str), symbols of snake (str) and apple (str)
- and number of apples to appear on the field (int), speed of snake movements in ms (int), scale of the field (int),
- shift for one step (int), colours of field (str), snake (str) and apple (str)
+Some constants that will be used: snake direction (str), number of apples to appear on the field (int),
+speed of snake movements in ms (int), scale of the field (int), shift for one step (int),
+colours of field (str), snake (str) and apple (str)
 """
 DOWN = "DOWN"
 UP = 'UP'
