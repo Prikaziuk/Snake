@@ -59,10 +59,10 @@ class Game:
         """
         Randomly generates coordinate for an apple on the field
 
-        :return: False if apple on the snake, True otherwise
+        :return: True if apple on the snake, False otherwise
         """
         self._apple_position = (randrange(self._field.height()), randrange(self._field.width()))
-        return self._apple_position not in self._snake
+        return self._apple_position in self._snake
 
     def put_apple(self):
         """
@@ -71,7 +71,7 @@ class Game:
         :return: None
         """
         apple_on = self.try_put_apple()
-        while not apple_on:
+        while apple_on:
             apple_on = self.try_put_apple()
 
     def _move_snake(self, direction):
