@@ -59,7 +59,7 @@ class Snake:
     def __init__(self, head_coord):
         """
         Arg:
-            head_coord (tuple) : coordinates of the snake head (y, x)
+            head_coord (tuple) : coordinates of the snake head (x, y)
         """
         self._snake_coord = deque([head_coord])
 
@@ -79,14 +79,14 @@ class Snake:
     def head(self):
         """
         :return:
-            (tuple) : coordinates of the snake head (y, x)
+            (tuple) : coordinates of the snake head (x, y)
         """
         return self._snake_coord[-1]
 
     def snake_coordinates(self):
         """
         :return:
-            (list of tuples) : list of coordinates of the snake (y, x)
+            (list of tuples) : list of coordinates of the snake (x, y)
         """
         return self._snake_coord
 
@@ -147,10 +147,10 @@ class Game:
         self._user_function = user
         self._apples_positions = set()
         self._direction_action = {
-            LEFT: lambda x, y: (y, (x - 1) % self._field.width()),
-            RIGHT: lambda x, y: (y, (x + 1) % self._field.width()),
-            UP: lambda x, y: ((y - 1) % self._field.height(), x),
-            DOWN: lambda x, y: ((y + 1) % self._field.height(), x)
+            LEFT: lambda x, y: ((x - 1) % self._field.width(), y),
+            RIGHT: lambda x, y: ((x + 1) % self._field.width(), y),
+            UP: lambda x, y: (x, (y - 1) % self._field.height()),
+            DOWN: lambda x, y: (x, (y + 1) % self._field.height())
         }
 
     def put_apples(self, number=NUMBER_OF_APPLES):
@@ -207,7 +207,7 @@ class Game:
         """
         Starts and controls the game.
 
-        Randomly puts apples on the field, asks user for snake movement direction, 
+        Randomly puts apples on the field, asks user for snake movement direction,
         :return: None
         :print: "YOU WIN! All apples are safely collected" when the game is finished
         """

@@ -27,6 +27,7 @@ SCALE = SHIFT = 10
 
 FIELD_COLOUR = 'green'
 SNAKE_COLOUR = 'blue'
+DIED_SNAKE_COLOUR = 'brown'
 APPLE_COLOUR = 'red'
 
 
@@ -78,24 +79,26 @@ class Game:
             self._snake.revert()
         else:
             self._snake.move(position, is_apple)
-        self.paint_snake()
+        if not self.check_snake():
+            self.paint_snake()
         self._after_id.append(self._canvas.after(SNAKE_SPEED, self._move_snake, direction))
         self._canvas.after_cancel(self._after_id.pop(0))
         if self.check_win() or self.check_snake():
+            self.paint_snake(colour=DIED_SNAKE_COLOUR)
             self._canvas.after_cancel(self._after_id.pop(0))
             self.check_progress()
 
-    def paint_snake(self):
+    def paint_snake(self, colour=SNAKE_COLOUR):
         """
         Paints snake on the field
 
         :return: None
         """
-        if not self.check_snake():
-            self._canvas.delete('snake')
-            for x, y in self._snake:
-                self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
-                                              outline='white', fill=SNAKE_COLOUR, tag='snake')
+        self._canvas.delete('snake')
+        for x, y in self._snake:
+            self._canvas.create_rectangle(x*SCALE, y*SCALE, x*SCALE+SHIFT, y*SCALE+SHIFT,
+                                          outline='white', fill=colour, tag='snake')
+
 
     def check_snake(self):
         """
